@@ -25,8 +25,20 @@ SECRET_KEY = 'django-insecure-bbsar_oe5jcb8ywopa_5&3#3-#@9571x7lwu2#%msh5d)*x=pj
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
+CORS_ORIGIN_ALLOW_ALL = True 
+
+CORS_ALLOWED_ORIGINS = [
+    "https://localhost",
+    "https://127.0.0.1",
+    "http://localhost:8001",
+    "http://localhost:8002",
+    "http://localhost:8003",
+    "http://localhost:8004",
+    "http://localhost:3000",
+    "http://192.168.0.7"
+]
 
 # Application definition
 
@@ -37,6 +49,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'corsheaders',
     'blockchain',
     'api',
 ]
@@ -49,6 +63,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'BlockChainPy.urls'
@@ -81,11 +97,12 @@ DATABASES = {
         'NAME': 'bc1',
         'USER': 'postgres',
         'PASSWORD': '123987',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'HOST': '172.27.0.1',
+        'PORT': '54320',
     }
 }
 
+ALLOWED_HOSTS = ['*']
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators

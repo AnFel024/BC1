@@ -1,7 +1,8 @@
 from django.http import Http404
+from django.db.models import Q  
 
-from api.serializers.serializers import blockChainSerializer
-from blockchain.models import blockChain
+from api.serializers.serializers import blockChainSerializer, transactionSerializer
+from blockchain.models import block, transaction
 from blockchain.views import newBlockChain
 
 from rest_framework.views import APIView
@@ -13,7 +14,7 @@ from rest_framework.response import Response
 class blockChainList(APIView):
     def get(self, request, format=None):
         print('pk')
-        blockChainObject = blockChain.objects.all()
+        blockChainObject = block.objects.all()
         serializer = blockChainSerializer(blockChainObject, many=True)
         return Response(serializer.data)
 
@@ -27,7 +28,7 @@ class blockChainList(APIView):
 
 class blockChainCreate(APIView):
     def post(self, request, format=None):
-        blockChainObject = blockChain(hash_pointer='1', id='hash23', Nonce='23', timestamp='2021-03-18T13:50:20+00:00', number_of_transactions='234')
+        blockChainObject = block(hash_pointer='1', id='hash23', Nonce='23', timestamp='2021-03-18T13:50:20+00:00', number_of_transactions='234')
         serializer = blockChainSerializer(blockChainObject, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -37,8 +38,8 @@ class blockChainCreate(APIView):
 class blockChainDetail(APIView):
     def get_object(self, pk):
         try:
-            return blockChain.objects.get(pk=pk)
-        except blockChain.DoesNotExist:
+            return block.objects.get(pk=pk)
+        except block.DoesNotExist:
             raise Http404
 
     def get(self, request, pk, format=None):
@@ -66,3 +67,11 @@ class blockChainDetail(APIView):
         blockChainObject = self.get_object(pk)
         blockChainObject.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class TransactionDetail(APIView):
+    def get(self, request, format=None):
+        mTransactionts = transaction.objects.all()
+        print(len(mTransactionts))
+        serializer = transactionSerializer(mTransactionts, many=True)
+
+        return Response(serializer.data)

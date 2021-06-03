@@ -6,7 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework import request, status
 import rest_framework
 
-from blockchain.models import blockChain
+from blockchain.models import block, transaction
 
 import datetime
 import hashlib
@@ -24,20 +24,48 @@ class newBlockChain:
         self.new_block(nonce=1, hash_pointer='0')
 
     def new_block(self, nonce, hash_pointer):
-        block = {
+        mBlock = {
             'index': len(self.chain) + 1, 
             'timestamp': str(datetime.datetime.now()),
             'nonce': nonce,
             'hash_pointer': hash_pointer,
             'transactions': self.transactions
             }
-        self.transactions = []
-        self.chain.append(block)
 
-        return block
+        if block.objects.order_by('-timestamp').exists():
+            last_block = block.objects.order_by('-timestamp').first().id
+        else:
+            last_block = '0'
+
+        new_block = block(
+            index=len(self.chain) + 1, 
+            timestamp= datetime.datetime.now(), 
+            Nonce= nonce, 
+            hash_pointer= last_block,
+            number_of_transactions = len(self.transactions),
+            id= self.hash(self.get_previous_block())
+            )
+
+        print(hash_pointer)
+        for model in transaction.objects.filter(block_position='0'):
+            print(model)
+            if hash_pointer == '0':
+                model.block_position = last_block
+            else:
+                model.block_position = hash_pointer
+
+            model.save()
+        
+        new_block.save()
+
+        
+        self.transactions = []
+        self.chain.append(mBlock)
+
+        return mBlock
 
     def get_previous_block(self):
-        return self.chain[-1]
+        return self.chain[-1] if len(self.chain) > 0 else 0
 
     def proof_of_work(self, previous_nonce):
         new_nonce = 1
@@ -83,6 +111,17 @@ class newBlockChain:
             'amount': amount,
             'time': str(datetime.datetime.now())
         })
+
+        new_transaction = transaction(
+            sender= sender,
+            receiver= receiver,
+            amount= amount,
+            timestamp= datetime.datetime.now(),
+            block_position= '0  '
+        )
+
+        new_transaction.save()
+
         previus_block = self.get_previous_block()
         return previus_block['index'] + 1
 
@@ -163,6 +202,8 @@ def add_transaction(request):
         received_json = json.loads(request.body)
         transaction_keys = ['sender', 'receiver', 'amount', 'time']
 
+        print('a')
+
         if not all(key in received_json for key in transaction_keys):
             return HttpResponse(status=400)
         
@@ -171,7 +212,7 @@ def add_transaction(request):
             'message': f'Transacción agregada al bloque {index}',
         }
 
-    return JsonResponse(response)
+        return JsonResponse(response)
 
 @csrf_exempt
 def connect_node(request):
